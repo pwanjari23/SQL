@@ -1,35 +1,26 @@
-const db = require('../utils/db-connection');
+const Bus = require('../models/Bus');
 
-// POST /buses
-exports.addBus = (req, res) => {
-    const { name, total_seats, available_seats } = req.body;
-
-    const sql = `
-        INSERT INTO buses (name, total_seats, available_seats)
-        VALUES (?, ?, ?)
-    `;
-
-    db.query(sql, [name, total_seats, available_seats], (err, result) => {
-        if (err) return res.status(500).json(err);
-
-        res.status(201).json({
-            message: 'Bus added successfully',
-            busId: result.insertId
-        });
-    });
+// Add new bus
+exports.addBus = async (req, res) => {
+  try {
+    const bus = await Bus.create(req.body);
+    res.status(201).json({ message: 'Bus added', bus });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
-// GET /buses/available/:seats
-exports.getAvailableBuses = (req, res) => {
-    const seats = req.params.seats;
-
-    const sql = `
-        SELECT * FROM buses
-        WHERE available_seats > ?
-    `;
-
-    db.query(sql, [seats], (err, results) => {
-        if (err) return res.status(500).json(err);
-        res.json(results);
+// Get buses with available seats > specified number
+exports.getAvailableBuses = async (req, res) => {
+  try {
+    const seats = parseInt(req.params.seats, 10);
+    const buses = await Bus.findAll({
+      where: {
+        available_seats: { [require('sequelize').Op.gt]: seats },
+      },
     });
+    res.json(buses);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };

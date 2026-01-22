@@ -1,15 +1,16 @@
-const express = require("express");
-const studentRoutes = require('./routes/studentRoutes');
+const express = require('express');
+const bodyParser = require('body-parser');
+
+const usersRoutes = require('./routes/usersRoutes');
+const busesRoutes = require('./routes/busesRoutes');
+
 const app = express();
+app.use(bodyParser.json());
 
-app.use(express.json());
+app.use('/users', usersRoutes);
+app.use('/buses', busesRoutes);
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
-
-app.use('/students', studentRoutes);
-
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

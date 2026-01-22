@@ -1,27 +1,21 @@
-const db = require('../utils/db-connection');
+const User = require('../models/User');
 
-// POST /users
-exports.addUser = (req, res) => {
-    const { name, email, phone } = req.body;
-
-    const sql = `INSERT INTO users (name, email, phone) VALUES (?, ?, ?)`;
-
-    db.query(sql, [name, email, phone], (err, result) => {
-        if (err) return res.status(500).json(err);
-
-        res.status(201).json({
-            message: 'User added successfully',
-            userId: result.insertId
-        });
-    });
+// Add new user
+exports.addUser = async (req, res) => {
+  try {
+    const user = await User.create(req.body);
+    res.status(201).json({ message: 'User added', user });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
-// GET /users
-exports.getUsers = (req, res) => {
-    const sql = `SELECT * FROM users`;
-
-    db.query(sql, (err, results) => {
-        if (err) return res.status(500).json(err);
-        res.json(results);
-    });
+// Get all users
+exports.getUsers = async (req, res) => {
+  try {
+    const users = await User.findAll();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
